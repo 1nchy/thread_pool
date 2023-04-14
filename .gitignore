@@ -1,0 +1,6 @@
+*
+
+!.gitignore
+!thread_pool.hpp
+!thread_pool.cpp
+!README.md
