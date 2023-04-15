@@ -1,5 +1,8 @@
 # thread_pool
 
+## details
+
+When a thread calls `condition_variable::wait()` and get blocked, the mutex is automatically released. When the condition variable is notified and the thread wakes up, it reacquires the mutex.
 
 ## example
 

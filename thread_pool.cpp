@@ -4,7 +4,7 @@ namespace asp {
 thread_pool::thread_pool(size_t _thread_n, size_t _task_max_n)
 : _m_task_max_size(_task_max_n) {
     _m_worker_threads.reserve(_thread_n);
-    for (int _i = 0; _i < _thread_n; ++_i) {
+    for (size_t _i = 0; _i < _thread_n; ++_i) {
         _m_worker_threads.emplace_back(&thread_pool::worker_thread_main, this);
     }
 }
