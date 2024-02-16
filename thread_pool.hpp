@@ -3,6 +3,7 @@
 
 #include <condition_variable>
 #include <functional>
+#include <future>
 #include <mutex>
 #include <numeric>
 #include <queue>
@@ -14,6 +15,7 @@ class thread_pool;
 
 class thread_pool {
 public:
+    // typedef typename thread_task_t::handler_t handler_t;
     typedef std::function<void()> thread_task_t;
     explicit thread_pool(
         size_t _thread_n,
@@ -21,15 +23,16 @@ public:
     );
     ~thread_pool();
 
-    void add_task(thread_task_t _p);
+    std::future<std::thread::id> add_task(thread_task_t _p);
     void close();
 private:
     std::vector<std::thread> _m_worker_threads;
     std::queue<thread_task_t> _m_task_queue;
+    std::queue<std::promise<std::thread::id>> _m_promise_queue;
     size_t _m_task_max_size;
     std::mutex _m_mutex;
     // close flag, avoid redundant closes.
-    bool _m_closed;
+    bool _m_closed = false;
     // used to limit the size of %_m_task_queue.
     std::condition_variable _m_task_queue_full;
     // used to nofity %_m_worker_threads.

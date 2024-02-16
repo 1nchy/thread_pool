@@ -11,7 +11,8 @@ thread_pool::thread_pool(size_t _thread_n, size_t _task_max_n)
 thread_pool::~thread_pool() {
     close();
 }
-void thread_pool::add_task(thread_task_t _p) {
+std::future<std::thread::id> thread_pool::add_task(thread_task_t _p) {
+    std::future<std::thread::id> _future;
     {
     std::unique_lock<std::mutex> _lock(_m_mutex);
     if (_m_task_queue.size() >= _m_task_max_size) {
@@ -20,8 +21,11 @@ void thread_pool::add_task(thread_task_t _p) {
         });
     }
     _m_task_queue.emplace(_p);
+    _m_promise_queue.emplace();
+    _future = _m_promise_queue.back().get_future();
     }
     _m_task_queue_changed.notify_one();
+    return _future;
 }
 void thread_pool::close() {
     {
@@ -40,7 +44,7 @@ void thread_pool::close() {
 }
 void thread_pool::worker_thread_main() {
     while (true) {
-        thread_task_t _task;
+        thread_pool::thread_task_t _task;
         {
         std::unique_lock<std::mutex> _lock(_m_mutex);
         _m_task_queue_changed.wait(_lock, [this] {
@@ -50,7 +54,9 @@ void thread_pool::worker_thread_main() {
             return;
         }
         _task = std::move(_m_task_queue.front());
+        _m_promise_queue.front().set_value(std::this_thread::get_id());
         _m_task_queue.pop();
+        _m_promise_queue.pop();
         }
         _m_task_queue_full.notify_one();
         _task();
