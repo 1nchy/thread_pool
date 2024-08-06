@@ -11,7 +11,7 @@ When a thread calls `condition_variable::wait()` and get blocked, the mutex is a
 #include <cstdio>
 
 int main(void) {
-    asp::thread_pool thp(5);
+    icy::thread_pool thp(5);
     for (int i = 0; i < 40; ++i) {
         thp.add_task([=]() {
             printf("task [ %d ].\n", i);
