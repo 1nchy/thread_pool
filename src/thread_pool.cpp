@@ -9,9 +9,9 @@ thread_pool::thread_pool(size_t _thread_n, size_t _task_max_n)
     }
 }
 thread_pool::~thread_pool() {
-    close();
+    _M_close();
 }
-void thread_pool::close() {
+void thread_pool::_M_close() {
     {
     std::unique_lock<std::mutex> _lock(_m_mutex);
     if (_m_closed) {

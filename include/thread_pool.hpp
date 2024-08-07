@@ -24,7 +24,8 @@ public:
     ~thread_pool();
 
     template <typename _T, typename... _Args> auto enqueue(_T, _Args&&...) -> std::future<typename std::result_of<_T(_Args...)>::type>;
-    void close();
+private:
+    void _M_close();
 private:
     std::vector<std::thread> _m_worker_threads;
     std::queue<std::function<void()>> _m_task_queue;
