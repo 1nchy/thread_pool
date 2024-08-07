@@ -23,7 +23,13 @@ public:
     );
     ~thread_pool();
 
-    template <typename _T, typename... _Args> auto enqueue(_T, _Args&&...) -> std::future<typename std::result_of<_T(_Args...)>::type>;
+    template <typename _T, typename... _Args> using reture_type = 
+#ifdef __cpp_lib_is_invocable
+    typename std::invoke_result<_T&&, _Args&&...>::type;
+#else
+    typename std::result_of<_T&&(_Args&&...)>::type;
+#endif
+    template <typename _T, typename... _Args> auto enqueue(_T&&, _Args&&...) -> std::future<reture_type<_T, _Args...>>;
 private:
     void _M_close();
 private:
@@ -43,7 +49,7 @@ private:
 
 
 template <typename _T, typename... _Args> auto
-thread_pool::enqueue(_T _t, _Args&&... _args) -> std::future<typename std::result_of<_T(_Args...)>::type> {
+thread_pool::enqueue(_T&& _t, _Args&&... _args) -> std::future<reture_type<_T, _Args...>> {
     using result_type = typename std::result_of<_T(_Args...)>::type;
     auto _task = std::make_shared<std::packaged_task<result_type()>>(
         std::bind(std::forward<_T>(_t), std::forward<_Args>(_args)...)
