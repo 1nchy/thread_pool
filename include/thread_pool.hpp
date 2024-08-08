@@ -8,7 +8,8 @@
 #include <numeric>
 #include <queue>
 #include <thread>
-#include <vector>
+// #include <vector>
+#include <list>
 #include <any>
 
 namespace icy {
@@ -16,6 +17,19 @@ class thread_pool;
 
 
 class thread_pool {
+private:
+struct worker_thread {
+    friend class thread_pool;
+public:
+    worker_thread(thread_pool* const);
+    ~worker_thread() = default;
+    worker_thread(const worker_thread&) = delete;
+    worker_thread(worker_thread&&) = delete;
+    worker_thread& operator=(const worker_thread&) = delete;
+    worker_thread& operator=(worker_thread&&) = delete;
+    std::thread _thread;
+    thread_pool* const _pool;
+};
 public:
     explicit thread_pool(
         size_t _thread_n,
@@ -33,7 +47,7 @@ public:
 private:
     void _M_close();
 private:
-    std::vector<std::thread> _m_worker_threads;
+    std::list<worker_thread> _m_worker_threads;
     std::queue<std::function<void()>> _m_task_queue;
     size_t _m_task_max_size;
     std::mutex _m_mutex;
@@ -46,6 +60,7 @@ private:
 
     void worker_thread_main();
 };
+
 
 
 template <typename _T, typename... _Args> auto

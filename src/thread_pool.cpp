@@ -3,9 +3,8 @@
 namespace icy {
 thread_pool::thread_pool(size_t _thread_n, size_t _task_max_n)
 : _m_task_max_size(_task_max_n) {
-    _m_worker_threads.reserve(_thread_n);
     for (size_t _i = 0; _i < _thread_n; ++_i) {
-        _m_worker_threads.emplace_back(&thread_pool::worker_thread_main, this);
+        _m_worker_threads.emplace_back(this);
     }
 }
 thread_pool::~thread_pool() {
@@ -20,9 +19,9 @@ void thread_pool::_M_close() {
     _m_closed = true;
     }
     _m_task_queue_changed.notify_all();
-    for (auto& _thread : _m_worker_threads) {
-        if (_thread.joinable()) {
-            _thread.join();
+    for (auto& _worker : _m_worker_threads) {
+        if (_worker._thread.joinable()) {
+            _worker._thread.join();
         }
     }
 }
