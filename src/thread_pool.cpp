@@ -4,11 +4,15 @@ namespace icy {
 thread_pool::thread_pool(size_t _thread_n, size_t _task_max_n)
 : _m_task_max_size(_task_max_n) {
     for (size_t _i = 0; _i < _thread_n; ++_i) {
-        _m_worker_threads.emplace_back(this);
+        _M_create_worker_thread();
     }
 }
 thread_pool::~thread_pool() {
     _M_close();
+}
+void thread_pool::_M_create_worker_thread() {
+    _m_worker_threads.emplace_front(this);
+    _m_worker_threads.front()._iter = _m_worker_threads.cbegin();
 }
 void thread_pool::_M_close() {
     {

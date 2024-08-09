@@ -29,6 +29,7 @@ public:
     worker_thread& operator=(worker_thread&&) = delete;
     std::thread _thread;
     thread_pool* const _pool;
+    std::list<worker_thread>::const_iterator _iter;
 };
 public:
     explicit thread_pool(
@@ -45,6 +46,7 @@ public:
 #endif
     template <typename _T, typename... _Args> auto enqueue(_T&&, _Args&&...) -> std::future<reture_type<_T, _Args...>>;
 private:
+    void _M_create_worker_thread();
     void _M_close();
 private:
     std::list<worker_thread> _m_worker_threads;
